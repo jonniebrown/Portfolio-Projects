@@ -1,0 +1,182 @@
+-- What is the busiest hour of the day for Chicago taxis in the past 3 years?
+
+SELECT
+  EXTRACT(HOUR FROM trip_start_timestamp) AS hour,
+  COUNT(unique_key) AS num_of_trips
+FROM
+  `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+WHERE
+  trip_start_timestamp BETWEEN '2020-01-01'AND '2022-12-31'
+GROUP BY
+  hour
+ORDER BY
+  num_of_trips DESC
+
+
+-- What is the most used taxi company by year?
+
+SELECT
+  company,
+  EXTRACT(YEAR FROM trip_start_timestamp) AS year,
+  COUNT(unique_key) AS num_of_trips
+FROM
+  `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+WHERE
+  company IS NOT NULL
+GROUP BY
+  company,
+  year
+ORDER BY
+  year,
+  num_of_trips DESC
+
+
+-- What payment type has the highest tips?
+
+SELECT 
+  AVG(tips) AS average_tip,
+  MAX(tips) AS max_tip,
+  payment_type
+FROM
+ `bigquery-public-data.chicago_taxi_trips.taxi_trips` 
+WHERE
+  tips IS NOT NULL AND
+  payment_type IS NOT NULL
+GROUP BY
+  payment_type
+ORDER BY
+  max_tip DESC
+
+
+-- Where are most people going when they use taxis? or What's the most common dropoff_community_area?
+
+SELECT
+  COUNT(unique_key) AS num_of_trips,
+  dropoff_community_area
+FROM
+  `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+GROUP BY
+  dropoff_community_area
+ORDER BY
+  num_of_trips DESC
+
+
+-- Which companies drive the fastest taxis?
+
+SELECT
+  AVG(trip_miles/((trip_seconds/60)/60)) AS average_mph,
+  company
+FROM
+  `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+WHERE
+  company IS NOT NULL AND
+  trip_seconds > 0 AND
+  trip_miles > 0
+GROUP BY
+  company
+ORDER BY
+  average_mph DESC
+
+
+-- Is there a correlation between crime and taxis trips?
+-- Example of Temp Table and JOIN
+
+WITH
+  crimes AS (
+    SELECT
+      community_area,
+      COUNT(unique_key) AS num_of_crimes
+    FROM
+      `bigquery-public-data.chicago_crime.crime`
+    WHERE
+      year >= 2013 AND
+      community_area IS NOT NULL
+    GROUP BY
+      community_area
+),
+  trips AS (
+    SELECT
+      pickup_community_area,
+      COUNT(unique_key) AS num_of_trips
+    FROM
+      `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+    WHERE 
+      pickup_community_area IS NOT NULL
+    GROUP BY
+      pickup_community_area
+)
+
+SELECT
+  crimes.community_area,
+  crimes.num_of_crimes,
+  trips.num_of_trips
+FROM 
+  crimes
+JOIN trips
+  ON crimes.community_area = trips.pickup_community_area
+ORDER BY
+  crimes.num_of_crimes DESC
+
+
+-- What community areas leave the highest tips?
+
+SELECT
+  pickup_community_area,
+  AVG(tips) AS average_tip,
+  MAX(tips) AS max_tip
+FROM
+  `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+WHERE
+  tips is not null
+  AND pickup_community_area is not null
+GROUP BY
+  pickup_community_area
+ORDER BY
+  average_tip DESC
+
+
+-- Which taxi companies have extra fees?
+
+SELECT
+  COUNT(extras) AS num_of_fees,
+  AVG(extras) AS average_fee,
+  MAX(extras) AS max_fee,
+  company
+FROM
+  `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+WHERE
+  company IS NOT NULL AND
+  extras > 0
+GROUP BY
+  company
+ORDER BY
+  num_of_fees DESC
+
+
+-- What time of year do most people use taxis?
+-- Example of CASE statement and nested query
+
+SELECT
+  SUM(num_of_trips) AS total_trips,
+  CASE
+    WHEN month BETWEEN 3 AND 5 THEN 'Spring'
+    WHEN month BETWEEN 6 AND 8 THEN 'Summer'
+    WHEN month BETWEEN 9 AND 11 THEN 'Fall'
+    ELSE 'Winter'
+    END AS season
+FROM 
+  (
+    SELECT
+      COUNT(unique_key) AS num_of_trips,
+      EXTRACT(MONTH FROM trip_start_timestamp) AS month
+    FROM
+      `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+    WHERE
+      trip_start_timestamp IS NOT NULL
+    GROUP BY
+      month
+  )
+GROUP BY
+  season
+ORDER BY
+  total_trips DESC
