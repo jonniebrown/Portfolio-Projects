@@ -1,4 +1,4 @@
-# Portfolio
+# Portfolio Projects
 
 Here are some projects I have self started that demonstrate data cleaning, analysis, and visualization using SQL and R.
 SQL queries are visualized in some dashboards I made with Tableau that can be found here: https://public.tableau.com/app/profile/jonnie.brown
