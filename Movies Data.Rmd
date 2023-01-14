@@ -1,0 +1,159 @@
+---
+title: "Movie Industry"
+output: github_document
+---
+data is from kaggle: https://www.kaggle.com/datasets/danielgrijalvas/movies
+
+# Cleaning
+load packages
+```{r}
+library(tidyverse)
+library(skimr)
+library(here)
+library(janitor)
+```
+
+import dataset
+```{r}
+movies <- read_csv("~/Downloads/movies.csv")
+```
+
+review dataset
+```{r}
+skim_without_charts(movies)
+```
+
+remove duplicates
+```{r}
+movies <- distinct(movies)
+```
+
+extract the country from the "released" column
+```{r}
+movies <- movies %>% 
+  mutate(temp = strsplit(released, split = "\\("))
+movies <- cbind(movies, t(data.frame(movies$temp)))
+names(movies)[names(movies) == "1"] <- "release_date"
+names(movies)[names(movies) == "2"] <- "release_country"
+rownames(movies) <- c(1:nrow(movies))
+movies <- movies[, !names(movies) == "temp"]
+movies$release_country <- str_sub(movies$release_country, 1, nchar(movies$release_country)-1)
+
+head(movies)
+```
+
+Change data type of release_date
+```{r}
+movies$release_date <- gsub(",", "", movies$release_date)
+movies$release_date <- as.Date(movies$release_date, "%B %d %Y")
+```
+
+
+remove rows with NA values
+```{r}
+movies <- drop_na(movies)
+```
+
+I noticed some discrepencies between "year" and the year listed in "release_date". So, let's add a new column with just the year listed from "release_date".
+```{r}
+movies <- movies %>% 
+mutate(release_year = format(as.Date(movies$release_date), "%Y"))
+
+head(movies)
+```
+
+# Quick Analysis
+### Plots
+```{r}
+ggplot(data = movies) +
+geom_point(mapping = aes(x= budget, y = gross)) +
+geom_smooth(mapping = aes(x= budget, y= gross)) +
+  labs(title = "Budget Vs Gross")
+```
+
+```{r}
+ggplot(data = movies) +
+geom_point(mapping = aes(x= score, y = gross)) +
+geom_smooth(mapping = aes(x= score, y= gross)) +
+  labs(title = "Score Vs Gross")
+```
+
+```{r}
+ggplot(data = movies) +
+geom_point(mapping = (aes(x= rating, y = gross))) +
+  labs(title = "Rating Vs Gross")
+```
+
+```{r}
+ggplot(data = movies) +
+geom_point(mapping = aes(x= genre, y = gross)) +
+theme(axis.text.x = element_text(angle = 40)) +
+  labs(title = "Genre Vs Gross")
+```
+
+```{r}
+ggplot(data = movies) +
+geom_point(mapping = aes(x= votes, y = gross)) +
+geom_smooth(mapping = aes(x= votes, y= gross)) +
+  labs(title = "Votes Vs Gross")
+```
+
+```{r}
+ggplot(data = movies) +
+geom_point(mapping = aes(x= runtime, y = gross)) +
+geom_smooth(mapping = aes(x= runtime, y= gross)) +
+  labs(title = "Runtime Vs Gross")
+```
+
+### Tables
+companies with the overall highest gross
+```{r}
+companies <- movies %>% 
+  group_by(company) %>% 
+  summarise(total_gross = sum(gross))
+```
+```{r}
+companies <- companies[order(desc(companies$total_gross)), ] %>% 
+  top_n(20)
+
+print(companies)
+```
+
+directors with the overall highest gross
+```{r}
+directors <- movies %>% 
+  group_by(director) %>% 
+  summarise(total_gross = sum(gross))
+```
+```{r}
+directors <- directors[order(desc(directors$total_gross)), ] %>% 
+  top_n(20)
+
+print(directors)
+```
+
+writers with the overall highest gross
+```{r}
+writers <- movies %>% 
+  group_by(writer) %>% 
+  summarise(total_gross = sum(gross))
+```
+```{r}
+writers <- writers[order(desc(writers$total_gross)), ] %>% 
+  top_n(20)
+
+print(writers)
+```
+
+stars with the overall highest gross
+```{r}
+stars <- movies %>% 
+  group_by(star) %>% 
+  summarise(total_gross = sum(gross))
+```
+```{r}
+stars <- stars[order(desc(stars$total_gross)), ] %>% 
+  top_n(20)
+
+print(stars)
+```
