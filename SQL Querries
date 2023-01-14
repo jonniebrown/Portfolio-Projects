@@ -2,17 +2,13 @@
 
 SELECT
   COUNT(unique_key) AS num_of_trips,
-  dropoff_community_area,
-  dropoff_latitude,
-  dropoff_longitude
+  dropoff_community_area
 FROM
   `bigquery-public-data.chicago_taxi_trips.taxi_trips`
 WHERE
   dropoff_community_area IS NOT NULL
 GROUP BY
-  dropoff_community_area,
-  dropoff_latitude,
-  dropoff_longitude
+  dropoff_community_area
 ORDER BY
   num_of_trips DESC
 
