@@ -66,42 +66,42 @@ head(movies)
 ### Plots
 ```{r}
 ggplot(data = movies) +
-geom_point(mapping = aes(x= budget, y = gross)) +
-geom_smooth(mapping = aes(x= budget, y= gross)) +
+  geom_point(mapping = aes(x= budget, y = gross)) +
+  geom_smooth(mapping = aes(x= budget, y= gross)) +
   labs(title = "Budget Vs Gross")
 ```
 
 ```{r}
 ggplot(data = movies) +
-geom_point(mapping = aes(x= score, y = gross)) +
-geom_smooth(mapping = aes(x= score, y= gross)) +
+  geom_point(mapping = aes(x= score, y = gross)) +
+  geom_smooth(mapping = aes(x= score, y= gross)) +
   labs(title = "Score Vs Gross")
 ```
 
 ```{r}
 ggplot(data = movies) +
-geom_point(mapping = (aes(x= rating, y = gross))) +
+  geom_point(mapping = (aes(x= rating, y = gross))) +
   labs(title = "Rating Vs Gross")
 ```
 
 ```{r}
 ggplot(data = movies) +
-geom_point(mapping = aes(x= genre, y = gross)) +
-theme(axis.text.x = element_text(angle = 40)) +
+  geom_point(mapping = aes(x= genre, y = gross)) +
+  theme(axis.text.x = element_text(angle = 40)) +
   labs(title = "Genre Vs Gross")
 ```
 
 ```{r}
 ggplot(data = movies) +
-geom_point(mapping = aes(x= votes, y = gross)) +
-geom_smooth(mapping = aes(x= votes, y= gross)) +
+  geom_point(mapping = aes(x= votes, y = gross)) +
+  geom_smooth(mapping = aes(x= votes, y= gross)) +
   labs(title = "Votes Vs Gross")
 ```
 
 ```{r}
 ggplot(data = movies) +
-geom_point(mapping = aes(x= runtime, y = gross)) +
-geom_smooth(mapping = aes(x= runtime, y= gross)) +
+  geom_point(mapping = aes(x= runtime, y = gross)) +
+  geom_smooth(mapping = aes(x= runtime, y= gross)) +
   labs(title = "Runtime Vs Gross")
 ```
 
